@@ -118,4 +118,8 @@ Should work on any system with an eGalax serial touch controller using the UT-pr
 
 ## License
 
-GPL v2 (same as the Linux kernel)
+GPL v2 (same as the Linux kernel). This module is derived from `egalax_ts_serial.c` by Zoltán Böszörményi, which is GPL v2 licensed.
+
+## Author
+
+Bailey Dickens

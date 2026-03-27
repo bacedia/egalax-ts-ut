@@ -24,7 +24,7 @@
  *
  * Tested on: FlyTech P495-C48 (POS 495), ICH8M UART, ttyS4
  *
- * Copyright (c) 2026
+ * Copyright (c) 2026 Bailey Dickens
  * Based on egalax_ts_serial.c by Zoltán Böszörményi
  */
 
@@ -223,6 +223,6 @@ static struct serio_driver egalax_ut_drv = {
 };
 module_serio_driver(egalax_ut_drv);
 
-MODULE_AUTHOR("Bailey <bacedia>");
+MODULE_AUTHOR("Bailey Dickens");
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE("GPL v2");

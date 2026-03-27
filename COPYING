@@ -1,0 +1,11 @@
+This module is licensed under the GNU General Public License, version 2
+(GPL-2.0-only).
+
+See https://www.gnu.org/licenses/old-licenses/gpl-2.0.html for the full
+license text.
+
+This module is derived from drivers/input/touchscreen/egalax_ts_serial.c
+in the Linux kernel, which is GPL-2.0-only licensed.
+
+Copyright (c) 2026 Bailey Dickens
+Copyright (c) 2015 Zoltán Böszörményi (original egalax_ts_serial driver)
