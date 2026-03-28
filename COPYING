@@ -7,5 +7,5 @@ license text.
 This module is derived from drivers/input/touchscreen/egalax_ts_serial.c
 in the Linux kernel, which is GPL-2.0-only licensed.
 
-Copyright (c) 2026 Bailey Dickens
+Copyright (c) 2026 Bailey Dickens <197719085+bacedia@users.noreply.github.com>
 Copyright (c) 2015 Zoltán Böszörményi (original egalax_ts_serial driver)
