@@ -50,23 +50,32 @@ sudo ./install.sh
 ```
 
 The install script:
-- Installs kernel headers and build tools if needed
+- Installs kernel headers, build tools, inputattach, and evtest if needed
 - Builds the module
 - Installs via DKMS (auto-rebuilds on kernel upgrades)
 - Blacklists the conflicting mainline `egalax_ts_serial` module
 - Loads the module
+- **Auto-detects the touchscreen serial port** (prompts you to tap the screen)
+- Writes config to `/etc/egalax-ts-ut.conf`
+- Installs and enables the systemd service
 
 ### Manual install
 
 ```bash
 # Install dependencies
-sudo apt install linux-headers-$(uname -r) build-essential inputattach
+sudo apt install linux-headers-$(uname -r) build-essential inputattach evtest
 
 # Build
 make
 
 # Load
 sudo insmod egalax_ts_ut.ko
+
+# Detect your serial port (tap the screen when prompted)
+sudo ./detect.sh
+
+# Or configure manually
+echo -e "PORT=/dev/ttyS4\nBAUD=9600" | sudo tee /etc/egalax-ts-ut.conf
 
 # Bind to serial port
 sudo inputattach --eetiegalax --baud 9600 /dev/ttyS4
@@ -81,32 +90,42 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now egalax-touch.service
 ```
 
-## Finding your serial port
+## Configuration
 
-The touchscreen controller is typically on an internal serial port (not USB). To find it:
+Config file: `/etc/egalax-ts-ut.conf`
+
+```
+PORT=/dev/ttyS4
+BAUD=9600
+```
+
+| Setting | Description |
+|---|---|
+| `PORT` | Serial port the touchscreen controller is on |
+| `BAUD` | Baud rate (9600 is standard for most eGalax controllers) |
+
+To re-detect the serial port:
 
 ```bash
-for port in /dev/ttyS{0..15}; do
-    echo "--- $port ---"
-    stty -F $port 9600 raw -echo 2>/dev/null
-    timeout 2 cat $port | xxd | head -3
-done
-# Tap the screen during each — look for "5554" (UT) in the output
+sudo ./detect.sh
 ```
+
+This scans `/dev/ttyS0` through `/dev/ttyS15` for UT packets while you tap the screen, and updates the config file.
 
 ## Calibration
 
-The module reports raw coordinates (0–16384 range). Use `xinput_calibrator` or a libinput calibration matrix to map to your screen:
+The module reports raw coordinates (0–16384 range). Use the included calibration script to generate a libinput calibration matrix:
 
 ```bash
-sudo apt install xinput-calibrator
-xinput_calibrator
+sudo ./calibrate.sh
 ```
 
-Or set the matrix manually:
+This walks you through tapping each corner, calculates the matrix (with Y-inversion detection), applies it to the current session, and optionally saves it as a persistent X11 config at `/etc/X11/xorg.conf.d/99-egalax-calibration.conf`.
+
+To calibrate manually:
 
 ```bash
-xinput set-prop "EETI eGalaxTouch Serial TouchScreen (UT)" "libinput Calibration Matrix" <values>
+xinput set-prop "EETI eGalaxTouch Serial TouchScreen (UT)" "libinput Calibration Matrix" <a> 0 <c> 0 <e> <f> 0 0 1
 ```
 
 ## Tested on

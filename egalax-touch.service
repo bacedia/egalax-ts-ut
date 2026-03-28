@@ -5,9 +5,10 @@ Requires=systemd-udevd.service
 
 [Service]
 Type=simple
+EnvironmentFile=/etc/egalax-ts-ut.conf
 ExecStartPre=/sbin/modprobe egalax_ts_ut
 ExecStartPre=/bin/sleep 2
-ExecStart=/usr/bin/inputattach --always --eetiegalax --baud 9600 /dev/ttyS4
+ExecStart=/usr/bin/inputattach --always --eetiegalax --baud ${BAUD} ${PORT}
 Restart=always
 RestartSec=3
 

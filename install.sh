@@ -8,6 +8,8 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+CONF="/etc/egalax-ts-ut.conf"
+
 # Check for kernel headers
 KVER=$(uname -r)
 if [ ! -d "/lib/modules/${KVER}/build" ]; then
@@ -16,11 +18,13 @@ if [ ! -d "/lib/modules/${KVER}/build" ]; then
     apt-get install -y -qq linux-headers-${KVER} build-essential
 fi
 
-# Check for inputattach
-if ! command -v inputattach &>/dev/null; then
-    echo "Installing inputattach..."
-    apt-get install -y -qq inputattach
-fi
+# Check for inputattach and evtest
+for pkg in inputattach evtest; do
+    if ! command -v $pkg &>/dev/null; then
+        echo "Installing $pkg..."
+        apt-get install -y -qq $pkg
+    fi
+done
 
 # Blacklist the old egalax_ts_serial module so it doesn't conflict
 echo "Blacklisting egalax_ts_serial (mainline driver)..."
@@ -54,11 +58,29 @@ fi
 echo "Loading module..."
 modprobe egalax_ts_ut || insmod ./egalax_ts_ut.ko
 
+# Auto-detect serial port if no config exists
+if [ ! -f "$CONF" ]; then
+    echo ""
+    echo "No configuration found. Running auto-detection..."
+    echo ""
+    bash "$(dirname "$0")/detect.sh"
+else
+    echo "Config already exists at $CONF, skipping detection."
+fi
+
+# Install systemd service
+echo "Installing systemd service..."
+cp "$(dirname "$0")/egalax-touch.service" /etc/systemd/system/egalax-touch.service
+systemctl daemon-reload
+systemctl enable egalax-touch.service
+systemctl restart egalax-touch.service
+
 echo ""
-echo "=== Module installed ==="
+echo "=== Installation complete ==="
 echo ""
-echo "To bind the touchscreen:"
-echo "  inputattach --eetiegalax --baud 9600 /dev/ttyS4"
+echo "Touchscreen service is running."
 echo ""
-echo "To make it start on boot, create a systemd service:"
-echo "  See egalax-touch.service in this repo"
+echo "  Config:       $CONF"
+echo "  Service:      systemctl status egalax-touch.service"
+echo "  Calibrate:    sudo ./calibrate.sh"
+echo "  Re-detect:    sudo ./detect.sh"
